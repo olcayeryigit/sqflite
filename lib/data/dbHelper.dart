@@ -56,10 +56,36 @@ class DbHelper {
 
   //Tüm verileri getirme
   //db adını verdiğimizde tüm verileri getirir
-  Future<List> getProducts() async {
+  //Burada liste map formatında gelir, bunu obje formatına çevirmemiz gerekir
+  //Liste ürün listesi formatında dönsün istiyorum, bu yüzden dönen veriyi map formatından obje formatına çekmemiz gerekir,
+  //List in generate isimli bir operasyonu vardır,
+  //result.length->listeyi kaç kere gezecek, herbir geziği eleman için index: i
+  //return Product : verdiğim verilerlebir tane Product olştur
+  //her bir return tek tek listeye eklenir
+  /*
+  Future<List<Product>> getProducts() async {
     Database db = await this.db;
     var result = await db.query("products");
-    return result;
+    return List.generate(result.length, (i) {
+      return Product(
+        id: result[i]["id"],
+        name: result[i]["name"],
+        description: result[i]["description"],
+        unitPrice: [i]["unitPrice"],
+      );
+    });
+  }
+*/
+  /*Bu şekilde yazmak doğru değildir, bu yazım şekli yerine bir method yazarız */
+
+  // Product içerisinde fromObject() methodu yazarız, constructor formatında da yazabiliriz
+
+  Future<List<Product>> getProducts() async {
+    Database db = await this.db;
+    var result = await db.query("products");
+    return List.generate(result.length, (i) {
+      return Product.fromObject(result[i]);
+    });
   }
 
   //Ekleme: int dönderelim: eklenip eklenmediğini 0 ya da 1 döndererek anlayalım
@@ -69,6 +95,26 @@ class DbHelper {
   // bu toMap() operasyonunu Product nesnesi içerisinde yazalım
   Future<int> insertProduct(Product product) async {
     Database db = await this.db;
-    db.insert("products", product.toMap());
+    var result = db.insert("products", product.toMap());
+  }
+
+  //Silme: int dönderelim: eklenip eklenmediğini 0 ya da 1 döndererek anlayalım
+  // rawdelete e sql vererek yapalım(unsi standartlar, postgre mysql oracle ve sqlite da aynı olan sorgular), yani rawdelete rawupdate vs normal standart sql sorgusudur, ancak en iyi kullanım bu değildir, update işleminde en iyi kullanım yapalım
+  Future<int> delete(int id) async {
+    Database db = await this.db;
+    var result = db.rawDelete("delete from products where id=$id");
+    return result;
+  }
+
+  //güvenilir format, delete de aynı formatta yazılabilir
+  Future<int> update(Product product) async {
+    Database db = await this.db;
+    var result = db.update(
+      "products",
+      product.toMap(),
+      where: "id=?",
+      whereArgs: [product.id],
+    );
+    return result;
   }
 }
