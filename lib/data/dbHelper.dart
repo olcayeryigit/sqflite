@@ -82,6 +82,7 @@ class DbHelper {
 
   Future<List<Product>> getProducts() async {
     Database db = await this.db;
+
     var result = await db.query("products");
     return List.generate(result.length, (i) {
       return Product.fromObject(result[i]);
