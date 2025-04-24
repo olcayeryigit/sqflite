@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:locale_db/data/dbHelper.dart';
 import 'package:locale_db/models/Product.dart';
+import 'package:locale_db/screens/product_add.dart';
 
 class ProductList extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class _ProductListState extends State {
   //DbHelper dbHelper=new DbHelper(); bunun yerine aşağıdaki gibi yazabiliriz
   var dbHelper =
       DbHelper(); //burada dbHelper ı instance oluşturarak kurduk ama aslında, statik fabrika deseni alyapılarıyla oluşturmak gerekir, ancak biz şimdi temeli öğrenmek için böyle yapıyoruz
-  late List<Product> products;
+  List<Product> products = [];
   //listviewde gezebilmek için counter
   int productCount = 0;
   //2-buildProductList te listview i yapalım
@@ -31,15 +32,8 @@ class _ProductListState extends State {
     //ürünleri burada set edebilirim, state i başlatabilirim, setState gibi
     //dbHelper.getProducts(); bir Future dönderir
 
-    var productsFuture = dbHelper.getProducts(); //async
-    productsFuture.then((data) {
-      setState(() {
-        // products verisini aldığımızda UI'nin yeniden render edilmesini sağlıyoruz.
-        this.products = data;
-        productCount = products.length; // ürün sayısını güncelle
-      });
-    }); //productsFuture.then ->data geldiğinde
-    //super.initState(); bunu çalıştırmamıza gerek yok,
+    ///ürünleri getirmek için method
+    getProducts();
   }
 
   @override
@@ -47,6 +41,14 @@ class _ProductListState extends State {
     return Scaffold(
       appBar: AppBar(title: Text("Ürün Listesi")),
       body: buildProductList(),
+      //Ürün eklemek için scaffoldun floatingactionbutton ını kullanırız
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          goToProductAdd();
+        },
+        child: Icon(Icons.add),
+        tooltip: "Yeni Ürün Ekle",
+      ),
     );
   }
 
@@ -72,5 +74,33 @@ class _ProductListState extends State {
         );
       },
     );
+  }
+
+  //add sayfasına gideceğiz, async yaparız
+  void goToProductAdd() async {
+    bool result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProductAdd()),
+    );
+    //sayfaya gidip, işlem yapmadan geri dönersem burada result null olmuş olur, result nulldan farklıysa yani gerçekten ekleme yapılmışsa
+    if (result != null) {
+      if (result == true) {
+        //ekleme yapıldıysa ürünleri yeniden listelememiz gerekir
+        getProducts();
+      }
+    }
+  }
+
+  void getProducts() async {
+    //async
+    var productsFuture = dbHelper.getProducts();
+    productsFuture.then((data) {
+      setState(() {
+        // products verisini aldığımızda UI'nin yeniden render edilmesini sağlıyoruz.
+        this.products = data;
+        productCount = data.length; // ürün sayısını güncelle
+      });
+    }); //productsFuture.then ->data geldiğinde
+    //super.initState(); bunu çalıştırmamıza gerek yok,
   }
 }

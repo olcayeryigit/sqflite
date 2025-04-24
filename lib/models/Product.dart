@@ -21,7 +21,7 @@ Product(int id, String name, String description, double unitPRice)
   //kayıt işlemi için id vermemize gerek yok
   Product({this.name, this.description, this.unitPrice});
   //güncelleme işlemi için idli versiyon
-  Product.whitId({thisId, this.name, this.description, this.unitPrice});
+  Product.whithId({this.id, this.name, this.description, this.unitPrice});
 
   //DB için Productı Map olarak döndüren fonksiyon
   //sqflite da ekleme yaparken id vermemeiz gerekmez, bu yüzden eğer id nulldan farklı ise id yi mapleriz, id null ise herhangi bir şey yapma deriz

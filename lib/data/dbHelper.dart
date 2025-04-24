@@ -1,3 +1,4 @@
+//sqflite paketi yalnızca mobil cihazlarda (Android ve iOS) çalışır. Eğer tarayıcıda (Web platformunda) çalıştırmaya çalışıyorsanız, desteklenmeyen bir platformda çalıştırıyor olabilirsiniz. Flutter Web için sqflite desteklenmez. Alternatif olarak sembast gibi web uyumlu bir veritabanı kütüphanesi kullanılabilir.
 import 'package:locale_db/models/Product.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -13,12 +14,18 @@ class DbHelper {
   // Veritabanını çağırmak için bir getter tanımlıyoruz
   Future<Database> get db async {
     // Eğer veritabanı daha önce açılmadıysa (null ise)
-    if (_db == null) {
-      // Veritabanını başlatıyoruz
-      _db = await initializeDb();
-    }
 
+    if (_db == null) {
+      try {
+        // Veritabanını başlatıyoruz
+
+        _db = await initializeDb();
+      } catch (e) {
+        throw Exception("Veritabanı başlatılamadı: $e");
+      }
+    }
     // Artık veritabanı nesnesi null değildir, onu döndürüyoruz
+
     return _db!;
   }
 
@@ -96,7 +103,7 @@ class DbHelper {
   // bu toMap() operasyonunu Product nesnesi içerisinde yazalım
   Future<int> insertProduct(Product product) async {
     Database db = await this.db;
-    var result = db.insert("products", product.toMap());
+    var result = await db.insert("products", product.toMap());
     return result;
   }
 
@@ -104,14 +111,14 @@ class DbHelper {
   // rawdelete e sql vererek yapalım(unsi standartlar, postgre mysql oracle ve sqlite da aynı olan sorgular), yani rawdelete rawupdate vs normal standart sql sorgusudur, ancak en iyi kullanım bu değildir, update işleminde en iyi kullanım yapalım
   Future<int> delete(int id) async {
     Database db = await this.db;
-    var result = db.rawDelete("delete from products where id=$id");
+    var result = await db.rawDelete("delete from products where id=$id");
     return result;
   }
 
   //güvenilir format, delete de aynı formatta yazılabilir
   Future<int> update(Product product) async {
     Database db = await this.db;
-    var result = db.update(
+    var result = await db.update(
       "products",
       product.toMap(),
       where: "id=?",
@@ -120,3 +127,6 @@ class DbHelper {
     return result;
   }
 }
+
+
+/*SQL sorgularına kullanıcı verisini doğrudan yerleştirmek güvenlik açığı yaratabilir (SQL enjeksiyonu). Bunun yerine, whereArgs kullanarak parametreyi güvenli bir şekilde eklemek daha iyi bir yöntemdir. */
