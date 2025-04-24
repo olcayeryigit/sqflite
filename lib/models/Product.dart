@@ -33,6 +33,7 @@ Product(int id, String name, String description, double unitPRice)
     if (id != null) {
       map["id"] = id;
     }
+    return map;
   }
 
   /*

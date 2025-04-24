@@ -97,6 +97,7 @@ class DbHelper {
   Future<int> insertProduct(Product product) async {
     Database db = await this.db;
     var result = db.insert("products", product.toMap());
+    return result;
   }
 
   //Silme: int dönderelim: eklenip eklenmediğini 0 ya da 1 döndererek anlayalım
