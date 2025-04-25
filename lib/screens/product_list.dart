@@ -55,6 +55,7 @@ class _ProductListState extends State {
   //**2-buildProductList te listview i dolduralım
   //burada product dönderebilmek için yukarda **1-DbHelper a ihtiyacımız var
   ListView buildProductList() {
+    //print(products); deneme
     return ListView.builder(
       itemCount: productCount,
       itemBuilder: (BuildContext context, int position) {
